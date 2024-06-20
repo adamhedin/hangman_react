@@ -58,9 +58,18 @@ type HangManProps = {
   word: string;
 };
 
+function useGameEnded(gameEnded = false) {
+  const [gameWon, setGameWon] = useState(false);
+  const [gameLost, setGameLost] = useState(false);
+  const endGame = (way: string) => {
+    setGameWon(way == "won");
+    setGameLost(way == "lost");
+  };
+  return [gameWon || gameLost, endGame];
+}
+
 export default function HangMan({ word }: HangManProps) {
   const correctWord: string[] = Array.from(word);
-  console.log(word.length);
   const [correctGuesses, setCorrectGuesses] = useState(
     Array(word.length).fill(null)
   );
@@ -80,7 +89,7 @@ export default function HangMan({ word }: HangManProps) {
       const newGuess = correctGuesses.splice(0);
       newGuess[index] = letter;
       setCorrectGuesses(newGuess);
-      setGameWon(correctGuesses.join("") == word);
+      setGameWon(newGuess.join("") == word);
     } else {
       if (addedParts[wrongGuesses]) {
         const addPart: part = addedParts[wrongGuesses];
@@ -91,21 +100,25 @@ export default function HangMan({ word }: HangManProps) {
       }
     }
     setGuesses([letter].concat(guesses));
-    console.log("guesses", guesses);
   }
 
   return (
     <pre>
       {gameLost ? (
-        <h1>DEAD</h1>
+        <>
+          <div className="dead">HANGED</div>
+          <h2>the correct word was: {word}</h2>
+        </>
       ) : gameWon ? (
         <h2>You won, the correct word was: {word}</h2>
       ) : (
-        <p />
+        <p></p>
       )}
-      {hangmanArray.map((row) => (
-        <div>{row.join("")}</div>
-      ))}
+      <div className="hang-board">
+        {hangmanArray.map((row) => (
+          <div>{row.join("")}</div>
+        ))}
+      </div>
       <h2>{correctGuesses.map((l) => (l ?? "_") + " ")}</h2>
       <br />
       <br />
